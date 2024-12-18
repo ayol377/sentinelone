@@ -10,7 +10,10 @@ impl Threats {
         Self { base }
     }
 
-    pub async fn get_threats(&self, mut params: GetThreatsParams) -> Result<Vec<Threat>> {
+    pub async fn get_threats(&self) -> Result<Vec<Threat>> {
+        let mut params = GetThreatsParams{
+            cursor: None,
+        };
         let mut data = Vec::new();
         let url = self.base.build_url("/web/api/v2.1/threats")?;
 
@@ -31,7 +34,7 @@ impl Threats {
                 break;
             }
 
-            params.next_cursor = Some(response.pagination.next_cursor);
+            params.cursor = Some(response.pagination.next_cursor);
         }
 
         Ok(data)
@@ -40,10 +43,7 @@ impl Threats {
 
 #[derive(Debug, Serialize)]
 pub struct GetThreatsParams {
-    pub limit: Option<u32>,
-    pub skip: Option<u32>,
-    pub resolved: Option<bool>,
-    pub next_cursor: Option<String>,
+    pub cursor: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
