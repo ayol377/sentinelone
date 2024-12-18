@@ -18,6 +18,10 @@ impl Threats {
         let url = self.base.build_url("/web/api/v2.1/threats")?;
 
         loop {
+            #[cfg(debug_assertions)]
+            {
+                println!("DEBUG: Fetching threats");
+            }
             let response = self.base
                 .request(
                     self.base.client
