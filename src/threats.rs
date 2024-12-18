@@ -29,7 +29,8 @@ impl Threats {
                         .query(&params)
                 )
                 .await?;
-
+            
+            println!("{:?}", &response);
             let response = response.json::<GetThreatsResponse>().await?;
 
             data.extend(response.data);
