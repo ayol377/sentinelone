@@ -5,6 +5,7 @@ use thiserror::Error;
 
 pub mod xdr;
 pub mod console;
+pub mod threats;
 pub mod error;
 
 #[derive(Error, Debug)]
@@ -46,6 +47,7 @@ pub trait ApiClient {
     async fn request(&self, builder: RequestBuilder) -> Result<reqwest::Response>;
 }
 
+#[derive(Clone)]
 pub struct BaseClient {
     client: ReqwestClient,
     config: ClientConfig,
@@ -72,7 +74,7 @@ impl BaseClient {
 impl ApiClient for BaseClient {
     async fn request(&self, builder: RequestBuilder) -> Result<reqwest::Response> {
         let response = builder
-            .header("Authorization", format!("ApiToken {}", self.config.api_token))
+            .header("Authorization", format!("Bearer {}", self.config.api_token))
             .send()
             .await?;
 

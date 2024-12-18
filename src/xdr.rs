@@ -12,26 +12,12 @@ impl XdrClient {
         })
     }
 
-    // Example method for getting threats
-    pub async fn get_threats(&self, params: GetThreatsParams) -> Result<GetThreatsResponse> {
-        let url = self.base.build_url("/web/api/v2.1/threats")?;
-        let response = self.base
-            .request(
-                reqwest::Client::new()
-                    .get(&url)
-                    .query(&params)
-            )
-            .await?;
-
-        Ok(response.json().await?)
-    }
-
     // Example method for getting agents
     pub async fn get_agents(&self, params: GetAgentsParams) -> Result<GetAgentsResponse> {
         let url = self.base.build_url("/web/api/v2.1/agents")?;
         let response = self.base
             .request(
-                reqwest::Client::new()
+                self.base.client
                     .get(&url)
                     .query(&params)
             )
@@ -39,28 +25,6 @@ impl XdrClient {
 
         Ok(response.json().await?)
     }
-}
-
-#[derive(Debug, Serialize)]
-pub struct GetThreatsParams {
-    pub limit: Option<u32>,
-    pub skip: Option<u32>,
-    pub resolved: Option<bool>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct GetThreatsResponse {
-    pub data: Vec<Threat>,
-    pub pagination: Pagination,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Threat {
-    pub id: String,
-    pub threat_name: String,
-    pub status: String,
-    pub severity: String,
-    // Add more fields as needed
 }
 
 #[derive(Debug, Serialize)]
