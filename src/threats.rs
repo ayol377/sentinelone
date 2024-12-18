@@ -37,7 +37,10 @@ impl Threats {
             if response.pagination.next_cursor.is_empty() {
                 break;
             }
-
+            #[cfg(debug_assertions)]
+            {
+                println!("DEBUG: Paginating: {:?}", Some(&response.pagination.next_cursor));
+            }
             params.cursor = Some(response.pagination.next_cursor);
         }
 
