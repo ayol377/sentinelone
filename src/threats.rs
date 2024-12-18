@@ -37,11 +37,12 @@ impl Threats {
             if response.pagination.next_cursor.is_empty() {
                 break;
             }
+            params.cursor = Some(response.pagination.next_cursor);
             #[cfg(debug_assertions)]
             {
-                println!("DEBUG: Paginating: {:?}", Some(&response.pagination.next_cursor));
+                println!("DEBUG: Total items: {:?}", &response.pagination.total_items);
+                println!("DEBUG: Paginating: {:?}", &params.cursor);
             }
-            params.cursor = Some(response.pagination.next_cursor);
         }
 
         Ok(data)
