@@ -12,38 +12,27 @@ impl Threats {
 
     pub async fn get_threats(&self) -> Result<Vec<Threat>> {
         let mut params = GetThreatsParams{
-            cursor: None,
+            cursor: "".to_string(),
         };
         let mut data = Vec::new();
         let url = self.base.build_url("/web/api/v2.1/threats")?;
-
         loop {
-            #[cfg(debug_assertions)]
-            {
-                println!("DEBUG: Fetching threats");
-            }
             let response = self.base
                 .request(
                     self.base.client
                         .get(&url)
+                        .header("Content-Type", "application/json")
                         .query(&params)
                 )
                 .await?;
-            
-            println!("{:?}", &response);
-            let response = response.json::<GetThreatsResponse>().await?;
-
+            let response = serde_json::from_str::<GetThreatsResponse>(&response.text().await?).unwrap();
             data.extend(response.data);
-
-            if response.pagination.next_cursor.is_empty() {
+            if response.pagination.next_cursor == "".to_string() {
                 break;
+            } else if params.cursor == response.pagination.next_cursor {
+                println!("DEBUG: Error with pagination");
             }
-            params.cursor = Some(response.pagination.next_cursor);
-            #[cfg(debug_assertions)]
-            {
-                println!("DEBUG: Total items: {:?}", &response.pagination.total_items);
-                println!("DEBUG: Paginating: {:?}", &params.cursor);
-            }
+            params.cursor = response.pagination.next_cursor;
         }
 
         Ok(data)
@@ -52,7 +41,7 @@ impl Threats {
 
 #[derive(Debug, Serialize)]
 pub struct GetThreatsParams {
-    pub cursor: Option<String>,
+    pub cursor: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -62,7 +51,6 @@ pub struct Threat {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GetThreatsResponse {
     pub data: Vec<Threat>,
     pub pagination: Pagination,
