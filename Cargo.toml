@@ -1,6 +1,6 @@
 [package]
 name = "sentinelone"
-version = "0.1.307"
+version = "0.1.317"
 edition = "2021"
 description = "A Rust API wrapper for SentinelOne XDR and Console APIs"
 authors = ["Ayaal Ali <ayaalali@proton.me>"]
@@ -14,3 +14,4 @@ serde_json = "1.0"
 thiserror = "1.0"
 url = "2.5"
 async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }

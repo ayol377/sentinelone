@@ -1,5 +1,7 @@
 use crate::{ApiClient, BaseClient, Result};
 use serde::{Deserialize, Serialize};
+use chrono::{Utc, Duration};
+use serde_json::Value;
 
 pub struct Threats {
     base: BaseClient,
@@ -10,29 +12,36 @@ impl Threats {
         Self { base }
     }
 
-    pub async fn get_threats(&self) -> Result<Vec<Threat>> {
+    pub async fn get_threats(&self, lookback: u32) -> Result<Vec<Value>> {
         let mut params = GetThreatsParams{
             cursor: "".to_string(),
         };
         let mut data = Vec::new();
         let url = self.base.build_url("/web/api/v2.1/threats")?;
+        let now = Utc::now();
+        let lookback_time = now - Duration::seconds(lookback as i64);
+        let lookback_str = lookback_time.format("%Y-%m-%dT%H:%M:%S%.6fZ").to_string();
         loop {
             let response = self.base
                 .request(
                     self.base.client
                         .get(&url)
                         .header("Content-Type", "application/json")
-                        .query(&params)
+                        .query(&[("cursor", &params.cursor), ("createdAt__gte", &lookback_str)])
                 )
                 .await?;
-            let response = serde_json::from_str::<GetThreatsResponse>(&response.text().await?).unwrap();
+            let response_text = response.text().await?;
+            // println!("INFO: RESPONSE TEXT: {}", response_text);
+            let response = serde_json::from_str::<GetThreatsResponse>(&response_text).unwrap();
             data.extend(response.data);
-            if response.pagination.next_cursor == "".to_string() {
+            if response.pagination.next_cursor.is_none() {
                 break;
-            } else if params.cursor == response.pagination.next_cursor {
+            } else if Some(params.cursor.clone()) == response.pagination.next_cursor {
                 println!("DEBUG: Error with pagination");
+                break;
             }
-            params.cursor = response.pagination.next_cursor;
+            println!("INFO: GOT {} THREATS", data.len());
+            params.cursor = response.pagination.next_cursor.unwrap_or_default();
         }
 
         Ok(data)
@@ -44,15 +53,9 @@ pub struct GetThreatsParams {
     pub cursor: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct Threat {
-    #[serde(flatten)]
-    pub json: serde_json::Map<String, serde_json::Value>
-}
-
 #[derive(Debug, Deserialize)]
 pub struct GetThreatsResponse {
-    pub data: Vec<Threat>,
+    pub data: Vec<Value>,
     pub pagination: Pagination,
 }
 
@@ -60,5 +63,5 @@ pub struct GetThreatsResponse {
 #[serde(rename_all = "camelCase")]
 pub struct Pagination {
     pub total_items: u32,
-    pub next_cursor: String,
+    pub next_cursor: Option<String>,
 }
