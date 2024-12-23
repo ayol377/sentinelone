@@ -1,7 +1,7 @@
 use crate::{BaseClient, ClientConfig, Result, threats::Threats};
 
 pub struct ConsoleClient {
-    base: BaseClient,
+    pub base: BaseClient,
     pub threats: Threats,
 }
 

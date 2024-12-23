@@ -1,6 +1,6 @@
 use crate::{ApiClient, BaseClient, Result};
 use serde::{Deserialize, Serialize};
-use chrono::{Duration, Utc, NaiveDateTime};
+use chrono::{Duration, Utc};
 use serde_json::Value;
 
 pub struct Threats {
@@ -61,6 +61,5 @@ struct GetThreatsResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Pagination {
-    pub total_items: u32,
     pub next_cursor: Option<String>,
 }
