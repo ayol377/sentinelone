@@ -1,6 +1,6 @@
 use crate::{ApiClient, BaseClient, Result};
 use serde::{Deserialize, Serialize};
-use chrono::{Utc, Duration};
+use chrono::{Duration, Utc, NaiveDateTime};
 use serde_json::Value;
 
 pub struct Threats {
@@ -31,16 +31,15 @@ impl Threats {
                 )
                 .await?;
             let response_text = response.text().await?;
-            // println!("INFO: RESPONSE TEXT: {}", response_text);
             let response = serde_json::from_str::<GetThreatsResponse>(&response_text).unwrap();
             data.extend(response.data);
+            println!("INFO: GOT {} THREATS", data.len());
             if response.pagination.next_cursor.is_none() {
                 break;
             } else if Some(params.cursor.clone()) == response.pagination.next_cursor {
                 println!("DEBUG: Error with pagination");
                 break;
             }
-            println!("INFO: GOT {} THREATS", data.len());
             params.cursor = response.pagination.next_cursor.unwrap_or_default();
         }
 
@@ -49,19 +48,19 @@ impl Threats {
 }
 
 #[derive(Debug, Serialize)]
-pub struct GetThreatsParams {
+struct GetThreatsParams {
     pub cursor: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct GetThreatsResponse {
+struct GetThreatsResponse {
     pub data: Vec<Value>,
     pub pagination: Pagination,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Pagination {
+struct Pagination {
     pub total_items: u32,
     pub next_cursor: Option<String>,
 }
