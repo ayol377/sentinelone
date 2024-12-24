@@ -1,3 +1,4 @@
+pub mod endpoints;
 use async_trait::async_trait;
 use reqwest::{Client as ReqwestClient, RequestBuilder};
 use std::time::Duration;
@@ -5,7 +6,6 @@ use thiserror::Error;
 
 pub mod xdr;
 pub mod console;
-pub mod threats;
 pub mod error;
 
 #[derive(Error, Debug)]

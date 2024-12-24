@@ -1,6 +1,6 @@
 [package]
 name = "sentinelone"
-version = "0.1.333"
+version = "0.1.337"
 edition = "2021"
 description = "A Rust API wrapper for SentinelOne XDR and Console APIs"
 authors = ["Ayaal Ali <ayaalali@proton.me>"]

@@ -1,8 +1,9 @@
-use crate::{BaseClient, ClientConfig, Result, threats::Threats};
+use crate::{BaseClient, ClientConfig, Result, endpoints::{threats::Threats, agents::Agents}};
 
 pub struct ConsoleClient {
     pub base: BaseClient,
     pub threats: Threats,
+    pub agents: Agents,
 }
 
 impl ConsoleClient {
@@ -10,6 +11,7 @@ impl ConsoleClient {
         let base = BaseClient::new(config)?;
         Ok(Self {
             threats: Threats::new(base.clone()),
+            agents: Agents::new(base.clone()),
             base,
         })
     }
