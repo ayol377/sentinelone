@@ -1,4 +1,5 @@
 use crate::{ApiClient, BaseClient, Result};
+use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -11,20 +12,23 @@ impl Agents {
         Self { base }
     }
 
-    pub async fn get_agents(&self) -> Result<Vec<Value>> {
+    pub async fn get_agents(&self, lookback: u32) -> Result<Vec<Value>> {
         let mut params = GetAgentsParams{
             cursor: "".to_string(),
             limit: 100.to_string(),
         };
         let mut data = Vec::new();
         let url = self.base.build_url("/web/api/v2.1/agents")?;
+        let now = Utc::now();
+        let lookback_time = now - Duration::seconds(lookback as i64);
+        let lookback_str = lookback_time.format("%Y-%m-%dT%H:%M:%S%.6fZ").to_string();
         loop {
             let response = self.base
                 .request(
                     self.base.client
                         .get(&url)
                         .header("Content-Type", "application/json")
-                        .query(&[("cursor", &params.cursor), ("limit", &params.limit)])
+                        .query(&[("cursor", &params.cursor), ("limit", &params.limit), ("createdAt__gte", &lookback_str)])
                 )
                 .await?;
             let response_text = response.text().await?;
