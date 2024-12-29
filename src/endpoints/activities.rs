@@ -13,15 +13,7 @@ impl Activities {
     }   
 
     pub async fn get_activities(&self, lookback: u32, types: Vec<String>) -> Result<Vec<Value>> {
-        let mut types_string = String::new();
-        // if !types.is_empty() {
-        //     for atype in types {
-        //         types_string.push_str(&format!(",{}", atype));
-        //     }
-        // }
-
-        types_string = types.join(",");
-        println!("types_string={}", types_string);
+        let types_string = types.join(",");
 
         let mut params = GetActivityParams{
             cursor: "".to_string(),
